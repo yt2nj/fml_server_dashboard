@@ -34,6 +34,21 @@ def get_color_by_percent(percent):
         return "#ee2222"  # 红
 
 
+# 获取自身 IP 地址
+def get_ip_address():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    if ip in {"127.0.0.1", "localhost"}:
+        ip = "unknown"
+    return ip
+
+
 # 获取 CPU 使用率（兼容 Linux 和部分非 Linux 系统）
 def get_cpu_usage():
     try:
@@ -49,7 +64,7 @@ def get_cpu_usage():
                 idle2 = int(line[4])
             usage = (1 - (idle2 - idle) / (total2 - total)) * 100
             color = get_color_by_percent(usage)
-            return f"CPU <span style=\"color:{color}\">{usage:.2f}%</span>"
+            return f'CPU <span style="color:{color}">{usage:.2f}%</span>'
         else:
             return "无法获取"
     except Exception as e:
@@ -84,7 +99,7 @@ def get_memory_info():
                 "swap_total": round(swap_total, 2),
                 "swap_used": round(swap_used, 2),
                 "swap_percent": f"{swap_percent:.2f}%",
-                "display": f"内存 {used:.2f}GB/{total:.2f}GB=<span style=\"color:{mem_color}\">{mem_percent:.2f}%</span><br>Swap {swap_used:.2f}GB/{swap_total:.2f}GB=<span style=\"color:{swap_color}\">{swap_percent:.2f}%</span>",
+                "display": f'内存 {used:.2f}GB/{total:.2f}GB=<span style="color:{mem_color}">{mem_percent:.2f}%</span><br>Swap {swap_used:.2f}GB/{swap_total:.2f}GB=<span style="color:{swap_color}">{swap_percent:.2f}%</span>',
             }
         else:
             return {"display": "无法获取"}
@@ -106,7 +121,7 @@ def get_disk_info():
             "total": total,
             "used": used,
             "percent": f"{percent:.2f}%",
-            "display": f"硬盘 {used}GB/{total}GB=<span style=\"color:{color}\">{percent:.2f}%</span>",
+            "display": f'硬盘 {used}GB/{total}GB=<span style="color:{color}">{percent:.2f}%</span>',
         }
     except Exception as e:
         print(f"获取硬盘信息失败: {e}")
@@ -154,14 +169,14 @@ def get_gpu_info():
             gpu_detail.append(
                 {
                     "index": i,
-                    "util": f"<span style=\"color:{util_color}\">{util}%</span>",
-                    "memory": f"<span style=\"color:{mem_color}\">{mem_used}MB/{mem_total}MB={mem_ratio:.2f}%</span>",
+                    "util": f'<span style="color:{util_color}">{util}%</span>',
+                    "memory": f'<span style="color:{mem_color}">{mem_used}MB/{mem_total}MB={mem_ratio:.2f}%</span>',
                     "fan": f"{fan}%",
                     "power": f"{power}W",
                 }
             )
             display_list.append(
-                f"[GPU{i}]<br>使用 <span style=\"color:{util_color}\">{util}%</span> 风扇 {fan}% 功率 {power}W<br>显存 <span style=\"color:{mem_color}\">{mem_used}MB/{mem_total}MB={mem_ratio:.2f}%</span>"
+                f'[GPU{i}]<br>使用 <span style="color:{util_color}">{util}%</span> 风扇 {fan}% 功率 {power}W<br>显存 <span style="color:{mem_color}">{mem_used}MB/{mem_total}MB={mem_ratio:.2f}%</span>'
             )
         return {"gpu_detail": gpu_detail, "display": "<br>".join(display_list)} if gpu_detail else {"display": "无GPU"}
     except Exception as e:
@@ -183,7 +198,7 @@ def main():
         # 收集系统信息
         info = {
             "name": {"display": name},
-            "ip": {"display": socket.gethostbyname(socket.gethostname())},
+            "ip": {"display": get_ip_address()},
             "cpu": {"display": get_cpu_usage()},
             "memory": get_memory_info(),
             "disk": get_disk_info(),
