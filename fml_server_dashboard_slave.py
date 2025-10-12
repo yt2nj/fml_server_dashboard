@@ -89,13 +89,13 @@ def get_memory_info():
             with open("/proc/meminfo", "r") as f:
                 lines = f.readlines()
                 total_kb = int(re.search(r"MemTotal:\s+(\d+)", lines[0]).group(1))
-                free_kb = int(re.search(r"MemFree:\s+(\d+)", lines[1]).group(1))
+                available_kb = int(re.search(r"MemAvailable:\s+(\d+)", lines[2]).group(1))
                 swap_total_kb = int(re.search(r"SwapTotal:\s+(\d+)", lines[14]).group(1))
                 swap_free_kb = int(re.search(r"SwapFree:\s+(\d+)", lines[15]).group(1))
             # 转换为GB单位并计算使用率
             total = total_kb / 1024 / 1024
-            free = free_kb / 1024 / 1024
-            used = total - free
+            available = available_kb / 1024 / 1024
+            used = total - available
             mem_percent = (used / total * 100) if total > 0 else 0
             # 计算Swap使用情况
             swap_total = swap_total_kb / 1024 / 1024
