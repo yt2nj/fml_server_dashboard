@@ -7,6 +7,7 @@ import sys
 import argparse
 import time
 import os
+import shutil
 import platform
 import re
 import json
@@ -165,6 +166,9 @@ def get_gpu_info():
 
     try:
         import subprocess
+
+        if shutil.which("nvidia-smi") is None:
+            return {"display": "无GPU"}
 
         # 执行nvidia-smi命令获取GPU信息
         result = subprocess.run(
