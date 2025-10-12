@@ -107,12 +107,14 @@ def get_memory_info():
             mem_color = get_color_by_percent(mem_percent)
             swap_color = get_color_by_percent(swap_percent)
             return {
-                "total": round(total, 2),
-                "used": round(used, 2),
-                "percent": f"{mem_percent:.2f}%",
-                "swap_total": round(swap_total, 2),
-                "swap_used": round(swap_used, 2),
-                "swap_percent": f"{swap_percent:.2f}%",
+                "memory_detail": {
+                    "total": round(total, 2),
+                    "used": round(used, 2),
+                    "percent": f"{mem_percent:.2f}%",
+                    "swap_total": round(swap_total, 2),
+                    "swap_used": round(swap_used, 2),
+                    "swap_percent": f"{swap_percent:.2f}%",
+                },
                 "display": f'内存 {used:.2f}GB/{total:.2f}GB=<span style="color:{mem_color}">{mem_percent:.2f}%</span><br>Swap {swap_used:.2f}GB/{swap_total:.2f}GB=<span style="color:{swap_color}">{swap_percent:.2f}%</span>',
             }
         else:
@@ -125,20 +127,31 @@ def get_memory_info():
 # ---------- 获取根目录的硬盘使用情况信息 ----------
 def get_disk_info():
     try:
-        # 获取根目录的文件系统统计信息
-        stat = os.statvfs("/")
-        total = (stat.f_blocks * stat.f_frsize) // (1024**3)  # 转换为GB
-        free = (stat.f_bfree * stat.f_frsize) // (1024**3)
-        used = total - free
-        percent = (used / total * 100) if total > 0 else 0
-        # 生成带颜色标记的显示字符串
-        color = get_color_by_percent(percent)
-        return {
-            "total": total,
-            "used": used,
-            "percent": f"{percent:.2f}%",
-            "display": f'硬盘 {used}GB/{total}GB=<span style="color:{color}">{percent:.2f}%</span>',
-        }
+        if platform.system() == "Linux":
+            disk_detail = []
+            display_list = []
+            for line in os.popen("df -kP | awk 'NR>1 {print $6}' | sort -u").read().splitlines():
+                mount = line.strip()
+                stat = os.statvfs(mount)
+                total = (stat.f_blocks * stat.f_frsize) // (1024**3)
+                free = (stat.f_bfree * stat.f_frsize) // (1024**3)
+                used = total - free
+                if total < 256:
+                    continue  # 忽略小于256GB的挂载点
+                percent = (used / total * 100) if total > 0 else 0
+                color = get_color_by_percent(percent)
+                disk_detail.append(
+                    {
+                        "mount": mount,
+                        "total": total,
+                        "used": used,
+                        "percent": f"{percent:.2f}%",
+                    }
+                )
+                display_list.append(f'{mount} {used}GB/{total}GB=<span style="color:{color}">{percent:.2f}%</span>')
+            return {"disk_detail": disk_detail, "display": "<br>".join(display_list)} if disk_detail else {"display": "无硬盘"}
+        else:
+            return {"display": "无法获取"}
     except Exception as e:
         print(f"获取硬盘信息失败: {e}")
         return {"display": "出错"}
