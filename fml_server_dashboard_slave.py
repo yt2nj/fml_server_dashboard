@@ -59,7 +59,7 @@ def get_ip_address():
 # ---------- 获取CPU温度 ----------
 def get_cpu_temp():
     try:
-        if shutil.which("/sys/class/thermal/thermal_zone0/temp") is None:
+        if not os.path.exists("/sys/class/thermal/thermal_zone0/temp"):
             return "无法获取温度"
         if platform.system() == "Linux":
             with open("/sys/class/thermal/thermal_zone0/temp") as f:
