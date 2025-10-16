@@ -56,6 +56,24 @@ def get_ip_address():
     return ip
 
 
+# ---------- 获取CPU温度 ----------
+def get_cpu_temp():
+    try:
+        if shutil.which("/sys/class/thermal/thermal_zone0/temp") is None:
+            return "无法获取温度"
+        if platform.system() == "Linux":
+            with open("/sys/class/thermal/thermal_zone0/temp") as f:
+                milli = int(f.read().strip())
+            temp = milli / 1000.0  # 摄氏度
+            color = get_color_by_percent(min(temp, 100))  # 把温度直接当百分比用
+            return f'温度 <span style="color:{color}">{temp:.1f}°C</span>'
+        else:
+            return "无法获取温度"
+    except Exception as e:
+        print(f"获取温度失败: {e}")
+        return "出错"
+
+
 # ---------- 获取CPU使用率，通过读取/proc/stat文件计算（仅限Linux系统） ----------
 def get_cpu_usage():
     try:
@@ -76,7 +94,7 @@ def get_cpu_usage():
             color = get_color_by_percent(usage)
             return f'CPU <span style="color:{color}">{usage:.2f}%</span>'
         else:
-            return "无法获取"
+            return "无法获取 CPU 使用率"
     except Exception as e:
         print(f"获取 CPU 使用率失败: {e}")
         return "出错"
@@ -240,7 +258,7 @@ def main():
         info = {
             "name": {"display": name},
             "ip": {"display": get_ip_address()},
-            "cpu": {"display": get_cpu_usage()},
+            "cpu": {"display": "<br>".join([get_cpu_usage(), get_cpu_temp()])},
             "memory": get_memory_info(),
             "disk": get_disk_info(),
             "gpu": get_gpu_info(),
