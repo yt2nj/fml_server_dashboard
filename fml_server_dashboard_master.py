@@ -129,17 +129,35 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
         # 生成HTML页面的头部和样式
-        html = """<html>
+        html = """<html lang=zh-CN translate=no>
 <head>
 <title>FML服务器仪表盘</title>
 <meta charset="utf-8">
+<meta name=description content="FML服务器仪表盘">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=theme-color content="#ffffff" media="(prefers-color-scheme:light)">
+<meta name=theme-color content="#121212" media="(prefers-color-scheme:dark)">
+<meta name=apple-mobile-web-app-capable content=yes>
+<meta name=apple-mobile-web-app-status-bar-style content=black-translucent>
 <style>
-    body{font-family:Consolas,Monaco,monospace;background:#f7f7f7;}
-    h1{text-align:center;}
-    table{border-collapse:collapse;border-radius:8px;overflow:hidden;width:max-content;max-width:98%;margin:0 auto;background:#fff;box-shadow:0 2px 8px #ccc;}
-    th,td{border:1px solid #bbb;padding:10px 8px;text-align:center;}
-    th{background:#e3e3e3;}
-    tr:nth-child(even){background:#f2f2f2;}
+    /* 全局变量+字体+背景 */
+    :root{--bg:#fff;--fg:#212121;--accent:#0d6efd;--border:#e0e0e0;--stripe:#fafafa;font-family:Consolas,Monaco,monospace;}
+    body{background:var(--bg);color:var(--fg);margin:0;padding:2rem;}
+    /* 深色模式自动切换 */
+    @media (prefers-color-scheme:dark){:root{--bg:#121212;--fg:#e0e0e0;--accent:#4dabf7;--border:#333;--stripe:#1e1e1e;}tbody tr:hover{background:rgba(77,171,247,.1);}}
+    /* 标题居中 */
+    h1{text-align:center;margin-bottom:1.5rem;font-weight:600;}
+    /* 卡片式表格 */
+    table{text-align:center;width:100%;max-width:960px;margin:0 auto;border-collapse:collapse;background:var(--glass);-webkit-backdrop-filter:blur(var(--blur));backdrop-filter:blur(var(--blur));box-shadow:0 4px 18px rgba(0,0,0,.06);border-radius:12px;overflow:hidden;}
+    /* 表头透明 */
+    th{background:transparent;font-weight:600;letter-spacing:.5px;color:var(--accent);}
+    /* 单元格统一边框 */
+    td,th{padding:14px 16px;border-bottom:1px solid var(--border);}
+    /* 去掉最后一行底边 */
+    tr:last-child td{border:none;}
+    /* 斑马纹+悬浮高亮 */
+    tbody tr:nth-child(even){background:var(--stripe);}
+    tbody tr:hover{background:rgba(13,110,253,.06);}
 </style>
 </head>
 <body>
@@ -158,7 +176,9 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
 
         # 生成页面尾部
         html += "</table>\n"
-        html += '<p><a href="https://github.com/yt2nj/fml_server_dashboard">详情请见GitHub.</a></p>\n'
+        html += (
+            '<p><a href="https://github.com/yt2nj/fml_server_dashboard" style="color: var(--accent);">详情请见GitHub.</a></p>\n'
+        )
         html += "</body>\n</html>"
         # 发送HTML内容
         self.wfile.write(html.encode("utf-8"))
